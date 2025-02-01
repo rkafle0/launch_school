@@ -29,50 +29,73 @@ def compute_winner(player, computer):
         return -1
     return 1
 
-scores = {'player': 0, 'computer': 0}
-
-while True:
-    MESSAGE = ', '.join(
+def get_player_choice():
+    message = ', '.join(
             f'{key} ({name})' for key, name in VALID_CHOICES.items()
     )
 
-    prompt(f'Choose one: {MESSAGE}')
-    choice = input().lower()
+    while True:
+        prompt(f'Choose one: {message}')
+        choice = input().lower()
+        if choice in VALID_CHOICES:
+            return choice
+        prompt("That is not a valid choice.")
 
-    while choice not in VALID_CHOICES:
-        prompt("That's not a valid choice")
-        prompt(MESSAGE)
-        choice = input()
-
-    computer_choice = random.choice(list(VALID_CHOICES.keys()))
-    winner_result = compute_winner(choice, computer_choice)
-
-    if winner_result == 1:
+def display_round_result(winner):
+    if winner == 1:
         prompt('Player wins!')
-        scores["player"] += 1
-    elif winner_result == -1:
+    elif winner == -1:
         prompt('Computer wins!')
-        scores["computer"] += 1
     else:
         prompt('It is a tie!')
 
-    prompt(f'Player: {scores["player"]} - Computer {scores["computer"]}')
+def adjust_scores(winner_outcome, current_scores):
+    if winner_outcome == 1:
+        current_scores["player"] += 1
+    elif winner_outcome == -1:
+        current_scores["computer"] += 1
 
-    if scores["player"] == 3:
+    prompt(f'Player: {current_scores["player"]}'
+            f'- Computer: {current_scores["computer"]}')
+
+def is_match_won(current_scores):
+    return current_scores["player"] == 3 or current_scores["computer"] == 3
+
+def display_match_winner(current_scores):
+    if current_scores["player"] == 3:
         prompt('We have a winner! Player wins.')
-        break
-
-    if scores["computer"] == 3:
+    else:
         prompt('We have a winner! Computer wins.')
-        break
 
+def play_again():
     while True:
         prompt("Do you want to play again (y/n)?")
         answer = input().lower()
 
-        if answer.startswith('n') or answer.startswith('y'):
-            break
-        prompt("That's not a valid choice")
+        if answer in ['y']:
+            return True
+        if answer in ['n']:
+            return False
 
-    if answer[0] == 'n':
+        prompt("Please enter in 'y' or 'n'.")
+
+scores = {'player': 0, 'computer': 0}
+
+while True:
+    player_choice = get_player_choice()
+    comp_choice = random.choice(list(VALID_CHOICES.keys()))
+    winner_result = compute_winner(player_choice, comp_choice)
+
+    prompt(f'Player chose: {VALID_CHOICES[player_choice]}. '
+            f'Computer chose: {VALID_CHOICES[comp_choice]}.')
+
+    display_round_result(winner_result)
+    adjust_scores(winner_result, scores)
+
+    if is_match_won(scores):
+        display_match_winner(scores)
+        scores = {'player': 0, 'computer': 0}
+
+    if not play_again():
+        prompt("Thanks for playing. Goodbye!")
         break
